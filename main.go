@@ -10,8 +10,6 @@ import (
 
     "github.com/Mikeford79/gorumble/botgen"
     "github.com/eiannone/keyboard"
-    "github.com/andlabs/ui"
-    _ "github.com/andlabs/ui/winmanifest"
 )
 
 var (
@@ -52,8 +50,8 @@ func manageViewers(targetCount int) {
     }
 }
 
-func updateLabel(label *ui.Label) {
-    label.SetText(fmt.Sprintf("Total viewers: %d (Real: %d, Bot: %d)", targetCount+realViewers, realViewers, len(viewerIDs)))
+func updateStatus() {
+    fmt.Printf("Total viewers: %d (Real: %d, Bot: %d)\n", targetCount+realViewers, realViewers, len(viewerIDs))
 }
 
 func main() {
@@ -88,47 +86,12 @@ func main() {
     sigChan := make(chan os.Signal, 1)
     signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-    // Initialize GUI
-    err = ui.Main(func() {
-        window := ui.NewWindow("Viewbot Controller", 300, 100, true)
-        label := ui.NewLabel("Total viewers: 0 (Real: 0, Bot: 0)")
-
-        upButton := ui.NewButton("Add Bot")
-        downButton := ui.NewButton("Remove Bot")
-
-        upButton.OnClicked(func(*ui.Button) {
-            targetCount++
-            manageViewers(targetCount)
-            updateLabel(label)
-        })
-
-        downButton.OnClicked(func(*ui.Button) {
-            if targetCount > 0 {
-                targetCount--
-                manageViewers(targetCount)
-                updateLabel(label)
-            }
-        })
-
-        box := ui.NewVerticalBox()
-        box.Append(label, false)
-        box.Append(upButton, false)
-        box.Append(downButton, false)
-        window.SetChild(box)
-
-        // Update label initially
-        updateLabel(label)
-
-        window.OnClosing(func(*ui.Window) bool {
-            ui.Quit()
-            return true
-        })
-
-        window.Show()
-    })
-    if err != nil {
-        panic(err)
+    // Initialize keyboard input
+    if err := keyboard.Open(); err != nil {
+        fmt.Println("Failed to open keyboard: ", err)
+        return
     }
+    defer keyboard.Close()
 
     // Simulate real viewers count change (for demonstration purposes)
     go func() {
@@ -138,36 +101,25 @@ func main() {
         }
     }()
 
-    // Handle keyboard inputs for adding/removing bots
-    go func() {
-        if err := keyboard.Open(); err != nil {
-            fmt.Println("Failed to open keyboard: ", err)
+    for {
+        select {
+        case <-sigChan:
+            fmt.Println("Shutting down gracefully...")
             return
-        }
-        defer keyboard.Close()
-
-        for {
-            select {
-            case <-sigChan:
-                fmt.Println("Shutting down gracefully...")
-                return
-            default:
-                // Handle key press events
-                if key, _, err := keyboard.GetKey(); err == nil {
-                    switch key {
-                    case '↑': // KeyArrowUp
-                        targetCount++
-                    case '↓': // KeyArrowDown
-                        if targetCount > 0 {
-                            targetCount--
-                        }
+        default:
+            // Handle key press events
+            if key, _, err := keyboard.GetKey(); err == nil {
+                switch key {
+                case keyboard.KeyArrowUp:
+                    targetCount++
+                case keyboard.KeyArrowDown:
+                    if targetCount > 0 {
+                        targetCount--
                     }
-                    manageViewers(targetCount)
-                    updateLabel(nil) // Update GUI label if needed
                 }
+                manageViewers(targetCount)
+                updateStatus()
             }
         }
-    }()
-
-    select {} // Keep the program running
+    }
 }
