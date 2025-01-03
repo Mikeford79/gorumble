@@ -21,7 +21,7 @@ var (
 
 func banner() {
     fmt.Println(`
-        ┳┓         ┓    
+        ┳┓     ┓    
         ┣┫┓┏┏┳┓┣┓┏┓╋
         ┛┗┗┻┛┗┗┗┛┗┛┗ V3
                 Forked from Ryuku ^_^
