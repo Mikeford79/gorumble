@@ -13,7 +13,7 @@ func banner() {
 			┳┓     ┓    
 			┣┫┓┏┏┳┓┣┓┏┓╋
 			┛┗┗┻┛┗┗┗┛┗┛┗ V3
-					Ryuku wishes you a good viewbotting ^_^
+					Forked from Ryuku ^_^
 				`)
 }
 
