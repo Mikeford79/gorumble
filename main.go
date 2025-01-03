@@ -1,54 +1,104 @@
 package main
 
 import (
-	"flag"
-	"fmt"
-	"time"
+    "flag"
+    "fmt"
+    "os"
+    "os/signal"
+    "syscall"
+    "time"
 
-	"github.com/itsryuku/gorumbot/botgen"
+    "github.com/itsryuku/gorumbot/botgen"
+    "github.com/eiannone/keyboard"
 )
 
 func banner() {
-	fmt.Println(`
-			┳┓     ┓    
-			┣┫┓┏┏┳┓┣┓┏┓╋
-			┛┗┗┻┛┗┗┗┛┗┛┗ V3
-					Forked from Ryuku ^_^
-				`)
+    fmt.Println(`
+            ┳┓     ┓    
+            ┣┫┓┏┏┳┓┣┓┏┓╋
+            ┛┗┗┻┛┗┗┗┛┗┛┗ V3
+                    Forked from Ryuku ^_^
+                `)
+}
+
+func manageViewers(viewerIDs *[]string, videoID string, targetCount int, verbose bool) {
+    currentCount := len(*viewerIDs)
+    diff := targetCount - currentCount
+
+    if diff > 0 {
+        newViewers := botgen.GenerateViewerIDs(diff)
+        *viewerIDs = append(*viewerIDs, newViewers...)
+        botgen.Viewbot(newViewers, videoID, verbose)
+    } else if diff < 0 {
+        *viewerIDs = (*viewerIDs)[:targetCount]
+    }
 }
 
 func main() {
-	urlFlag := flag.String("u", "", "Video URL")
-	botsFlag := flag.Int("b", 0, "Number of bots")
-	verboseFlag := flag.Bool("v", false, "Verbose mode")
+    urlFlag := flag.String("u", "", "Video URL")
+    botsFlag := flag.Int("b", 0, "Number of bots")
+    verboseFlag := flag.Bool("v", false, "Verbose mode")
 
-	flag.Parse()
+    flag.Parse()
 
-	if *urlFlag == "" || *botsFlag == 0 {
-		fmt.Println("usage: go run main.go -u <videoURL> -b <num> [-v]")
-		fmt.Println("e.g: go run main.go -u https://rumble.com/v4qtw5r-live-gray-zone-warfare-closed-beta-lvl-3.html -b 50")
-		return
-	}
-	banner()
-	videoID, err := botgen.ExtractVideoID(*urlFlag)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+    if *urlFlag == "" || *botsFlag == 0 {
+        fmt.Println("usage: go run main.go -u <videoURL> -b <num> [-v]")
+        fmt.Println("e.g: go run main.go -u <your-video-url-here> -b <number-of-bots>")
+        return
+    }
+    banner()
+    videoID, err := botgen.ExtractVideoID(*urlFlag)
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
 
-	viewerIDs, extractedVideoID, channelName := botgen.GetViewerIds(videoID, *botsFlag)
-		
-	botgen.Viewbot(viewerIDs, extractedVideoID, *verboseFlag)
-	fmt.Println("(+) Viewbotting Channel:", channelName)
-	fmt.Println("(+) Click CTRL + C when you are done to exit.")
-	ticker := time.NewTicker(60 * time.Second)
-	defer ticker.Stop()
+    viewerIDs, extractedVideoID, channelName := botgen.GetViewerIds(videoID, *botsFlag)
+    botgen.Viewbot(viewerIDs, extractedVideoID, *verboseFlag)
+    fmt.Println("(+) Viewbotting Channel:", channelName)
+    fmt.Println("(+) Click CTRL + C when you are done to exit.")
 
-	for {
-		select {
-		case <-ticker.C:
-			botgen.Viewbot(viewerIDs, extractedVideoID, *verboseFlag)
-		}
-	}
-	
+    // Handle graceful shutdown
+    sigChan := make(chan os.Signal, 1)
+    signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+    // Initialize keyboard input
+    if err := keyboard.Open(); err != nil {
+        fmt.Println("Failed to open keyboard: ", err)
+        return
+    }
+    defer keyboard.Close()
+
+    targetCount := *botsFlag
+    realViewers := 0 // Simulating real viewers count
+
+    // Simulate real viewers count change (for demonstration purposes)
+    go func() {
+        for {
+            time.Sleep(10 * time.Second)
+            realViewers = 3 // Change this value to simulate actual real viewers
+        }
+    }()
+
+    for {
+        select {
+        case <-sigChan:
+            fmt.Println("Shutting down gracefully...")
+            return
+        default:
+            // Handle key press events
+            if key, err := keyboard.GetKey(); err == nil {
+                switch key {
+                case keyboard.KeyArrowUp:
+                    targetCount++
+                case keyboard.KeyArrowDown:
+                    if targetCount > 0 {
+                        targetCount--
+                    }
+                }
+                manageViewers(&viewerIDs, extractedVideoID, targetCount, *verboseFlag)
+                fmt.Printf("Total viewers: %d (Real: %d, Bot: %d)\n", targetCount+realViewers, realViewers, len(viewerIDs))
+            }
+        }
+    }
 }
