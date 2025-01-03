@@ -14,7 +14,7 @@ import (
 
 var (
     targetCount int
-    realViewers int
+    realViewers int = 0
     viewerIDs   map[string]string
     videoID     string
     verbose     bool
@@ -93,26 +93,18 @@ func main() {
     }
     defer keyboard.Close()
 
-    // Simulate real viewers count change (for demonstration purposes)
-    go func() {
-        for {
-            time.Sleep(10 * time.Second)
-            realViewers = 3 // Change this value to simulate actual real viewers
-        }
-    }()
-
+    // Handle key press events
     for {
         select {
         case <-sigChan:
             fmt.Println("Shutting down gracefully...")
             return
         default:
-            // Handle key press events
             if key, _, err := keyboard.GetKey(); err == nil {
                 switch key {
-                case keyboard.KeyArrowUp:
+                case keyboard.KeyArrowRight:
                     targetCount++
-                case keyboard.KeyArrowDown:
+                case keyboard.KeyArrowLeft:
                     if targetCount > 0 {
                         targetCount--
                     }
