@@ -101,10 +101,13 @@ func main() {
             return
         default:
             if key, _, err := keyboard.GetKey(); err == nil {
+                fmt.Printf("Key pressed: %v\n", key) // Debugging: print key pressed
                 switch key {
                 case keyboard.KeyArrowRight:
+                    fmt.Println("Adding a bot") // Debugging: print action
                     targetCount++
                 case keyboard.KeyArrowLeft:
+                    fmt.Println("Removing a bot") // Debugging: print action
                     if targetCount > 0 {
                         targetCount--
                     }
