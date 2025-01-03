@@ -8,7 +8,7 @@ import (
     "syscall"
     "time"
 
-    "github.com/itsryuku/gorumbot/botgen"
+    "github.com/Mikeford79/gorumble/botgen"
     "github.com/eiannone/keyboard"
 )
 
@@ -97,9 +97,9 @@ func main() {
             // Handle key press events
             if key, _, err := keyboard.GetKey(); err == nil {
                 switch key {
-                case keyboard.KeyArrowUp:
+                case '↑': // KeyArrowUp
                     targetCount++
-                case keyboard.KeyArrowDown:
+                case '↓': // KeyArrowDown
                     if targetCount > 0 {
                         targetCount--
                     }
