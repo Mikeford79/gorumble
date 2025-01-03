@@ -1,7 +1,10 @@
-module github.com/Mikeford79/gorumble
+module myviewbot
 
 go 1.18
 
-git add go.mod
-git commit -m "Update module path in go.mod"
-git push origin main
+require (
+    github.com/Mikeford79/gorumble v0.0.0-20250103173808-9a0ec692fc9f
+    github.com/eiannone/keyboard v0.0.0-20210803143700-43b91e8e22df
+)
+
+replace github.com/itsryuku/gorumbot => github.com/Mikeford79/gorumble v0.0.0-20250103173808-9a0ec692fc9f
