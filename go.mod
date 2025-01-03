@@ -1,3 +1,3 @@
-module github.com/itsryuku/gorumbot
+module github.com/Mikeford79/gorumble
 
-go 1.22.0
+go 1.18
