@@ -29,7 +29,7 @@ go mod init myviewbot
 Install the necessary dependencies for your project. In this case, you will need the github.com/itsryuku/gorumbot and github.com/eiannone/keyboard packages.
 
 ```sh
-go get github.com/itsryuku/gorumbot
+go get github.com/Mikeford79/gorumble
 go get github.com/eiannone/keyboard
 ```
 ## Run the Code
