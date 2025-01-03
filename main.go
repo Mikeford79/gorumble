@@ -22,11 +22,11 @@ var (
 
 func banner() {
     fmt.Println(`
-            ┳┓         ┓    
-            ┣┫┓┏┏┳┓┣┓┏┓╋
-            ┛┗┗┻┛┗┗┗┛┗┛┗ V3
-                    Forked from Ryuku ^_^
-                `)
+        ┳┓         ┓    
+        ┣┫┓┏┏┳┓┣┓┏┓╋
+        ┛┗┗┻┛┗┗┗┛┗┛┗ V3
+                Forked from Ryuku ^_^
+            `)
 }
 
 func manageViewers(targetCount int) {
