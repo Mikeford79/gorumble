@@ -14,23 +14,31 @@ import (
 
 func banner() {
     fmt.Println(`
-            ┳┓     ┓    
+            ┳┓         ┓    
             ┣┫┓┏┏┳┓┣┓┏┓╋
             ┛┗┗┻┛┗┗┗┛┗┛┗ V3
                     Forked from Ryuku ^_^
                 `)
 }
 
-func manageViewers(viewerIDs *[]string, videoID string, targetCount int, verbose bool) {
+func manageViewers(viewerIDs *map[string]string, videoID string, targetCount int, verbose bool) {
     currentCount := len(*viewerIDs)
     diff := targetCount - currentCount
 
     if diff > 0 {
-        newViewers := botgen.GenerateViewerIDs(diff)
-        *viewerIDs = append(*viewerIDs, newViewers...)
-        botgen.Viewbot(newViewers, videoID, verbose)
+        newUserAgents := botgen.GenerateUserAgents(diff)
+        for _, ua := range newUserAgents {
+            (*viewerIDs)[ua] = ua // Using user agent as viewer ID for simplicity
+            botgen.Viewbot(map[string]string{ua: ua}, videoID, verbose)
+        }
     } else if diff < 0 {
-        *viewerIDs = (*viewerIDs)[:targetCount]
+        for id := range *viewerIDs {
+            if targetCount <= 0 {
+                break
+            }
+            delete(*viewerIDs, id)
+            targetCount--
+        }
     }
 }
 
@@ -87,7 +95,7 @@ func main() {
             return
         default:
             // Handle key press events
-            if key, err := keyboard.GetKey(); err == nil {
+            if key, _, err := keyboard.GetKey(); err == nil {
                 switch key {
                 case keyboard.KeyArrowUp:
                     targetCount++
