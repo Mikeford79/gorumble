@@ -6,7 +6,6 @@ import (
     "os"
     "os/signal"
     "syscall"
-    "time"
 
     "github.com/Mikeford79/gorumble/botgen"
     "github.com/eiannone/keyboard"
@@ -14,7 +13,7 @@ import (
 
 var (
     targetCount int
-    realViewers int = 0
+    realViewers int = 0 // Ensure realViewers is initialized to 0
     viewerIDs   map[string]string
     videoID     string
     verbose     bool
@@ -33,11 +32,14 @@ func manageViewers(targetCount int) {
     currentCount := len(viewerIDs)
     diff := targetCount - currentCount
 
+    fmt.Printf("Managing viewers. Target: %d, Current: %d, Diff: %d\n", targetCount, currentCount, diff)
+
     if diff > 0 {
         newUserAgents := botgen.GenerateUserAgents(diff)
         for _, ua := range newUserAgents {
             viewerIDs[ua] = ua // Using user agent as viewer ID for simplicity
             botgen.Viewbot(map[string]string{ua: ua}, videoID, verbose)
+            fmt.Printf("Added bot: %s\n", ua)
         }
     } else if diff < 0 {
         for id := range viewerIDs {
@@ -45,6 +47,7 @@ func manageViewers(targetCount int) {
                 break
             }
             delete(viewerIDs, id)
+            fmt.Printf("Removed bot: %s\n", id)
             targetCount--
         }
     }
