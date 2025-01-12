@@ -20,30 +20,24 @@ var (
 )
 
 func banner() {
-    fmt.Println(`
-        ┳┓     ┓    
-        ┣┫┓┏┏┳┓┣┓┏┓╋
-        ┛┗┗┻┛┗┗┗┛┗┛┗ V3
-                Forked from Ryuku ^_^
-            `)
+    fmt.Println(` ┳┓ ┓ ┣┫┓┏┏┳┓┣┓┏┓╋ ┛┗┗┻┛┗┗┗┛┗┛┗ V3 Forked from Ryuku ^_^ `)
 }
 
 func manageViewers(targetCount int) {
     currentCount := len(viewerIDs)
     diff := targetCount - currentCount
-
     fmt.Printf("Managing viewers. Target: %d, Current: %d, Diff: %d\n", targetCount, currentCount, diff)
 
-    if diff > 0 {
+    if (diff > 0) {
         newUserAgents := botgen.GenerateUserAgents(diff)
         for _, ua := range newUserAgents {
             viewerIDs[ua] = ua // Using user agent as viewer ID for simplicity
             botgen.Viewbot(map[string]string{ua: ua}, videoID, verbose)
             fmt.Printf("Added bot: %s\n", ua)
         }
-    } else if diff < 0 {
+    } else if (diff < 0) {
         for id := range viewerIDs {
-            if targetCount <= 0 {
+            if (targetCount <= 0) {
                 break
             }
             delete(viewerIDs, id)
@@ -61,24 +55,26 @@ func main() {
     urlFlag := flag.String("u", "", "Video URL")
     botsFlag := flag.Int("b", 0, "Number of bots")
     verboseFlag := flag.Bool("v", false, "Verbose mode")
-
     flag.Parse()
 
-    if *urlFlag == "" || *botsFlag == 0 {
+    if (*urlFlag == "" || *botsFlag == 0) {
         fmt.Println("usage: go run main.go -u <videoURL> -b <num> [-v]")
         fmt.Println("e.g: go run main.go -u <your-video-url-here> -b <number-of-bots>")
         return
     }
+
     banner()
+
     var err error
     videoID, err = botgen.ExtractVideoID(*urlFlag)
-    if err != nil {
+    if (err != nil) {
         fmt.Println(err)
         return
     }
 
     viewerIDs, _, _ = botgen.GetViewerIds(videoID, *botsFlag)
     botgen.Viewbot(viewerIDs, videoID, *verboseFlag)
+
     targetCount = *botsFlag
     verbose = *verboseFlag
 
@@ -90,7 +86,7 @@ func main() {
     signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
     // Initialize keyboard input
-    if err := keyboard.Open(); err != nil {
+    if (err := keyboard.Open(); err != nil) {
         fmt.Println("Failed to open keyboard: ", err)
         return
     }
@@ -103,9 +99,9 @@ func main() {
             fmt.Println("Shutting down gracefully...")
             return
         default:
-            if key, _, err := keyboard.GetKey(); err == nil {
+            if (key, _, err := keyboard.GetKey(); err == nil) {
                 fmt.Printf("Key pressed: %v\n", key) // Debugging: print key pressed
-                switch key {
+                switch keyboard.Key(key) {  // Convert `key` to `keyboard.Key` type
                 case keyboard.KeyArrowRight:
                     fmt.Println("Adding a bot") // Debugging: print action
                     targetCount++
