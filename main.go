@@ -28,16 +28,16 @@ func manageViewers(targetCount int) {
     diff := targetCount - currentCount
     fmt.Printf("Managing viewers. Target: %d, Current: %d, Diff: %d\n", targetCount, currentCount, diff)
 
-    if (diff > 0) {
+    if diff > 0 {
         newUserAgents := botgen.GenerateUserAgents(diff)
         for _, ua := range newUserAgents {
             viewerIDs[ua] = ua // Using user agent as viewer ID for simplicity
             botgen.Viewbot(map[string]string{ua: ua}, videoID, verbose)
             fmt.Printf("Added bot: %s\n", ua)
         }
-    } else if (diff < 0) {
+    } else if diff < 0 {
         for id := range viewerIDs {
-            if (targetCount <= 0) {
+            if targetCount <= 0 {
                 break
             }
             delete(viewerIDs, id)
@@ -57,7 +57,7 @@ func main() {
     verboseFlag := flag.Bool("v", false, "Verbose mode")
     flag.Parse()
 
-    if (*urlFlag == "" || *botsFlag == 0) {
+    if *urlFlag == "" || *botsFlag == 0 {
         fmt.Println("usage: go run main.go -u <videoURL> -b <num> [-v]")
         fmt.Println("e.g: go run main.go -u <your-video-url-here> -b <number-of-bots>")
         return
@@ -67,7 +67,7 @@ func main() {
 
     var err error
     videoID, err = botgen.ExtractVideoID(*urlFlag)
-    if (err != nil) {
+    if err != nil {
         fmt.Println(err)
         return
     }
@@ -86,7 +86,7 @@ func main() {
     signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
     // Initialize keyboard input
-    if (err := keyboard.Open(); err != nil) {
+    if err := keyboard.Open(); err != nil {
         fmt.Println("Failed to open keyboard: ", err)
         return
     }
@@ -99,13 +99,13 @@ func main() {
             fmt.Println("Shutting down gracefully...")
             return
         default:
-            if (key, _, err := keyboard.GetKey(); err == nil) {
+            if key, _, err := keyboard.GetKey(); err == nil {
                 fmt.Printf("Key pressed: %v\n", key) // Debugging: print key pressed
-                switch keyboard.Key(key) {  // Convert `key` to `keyboard.Key` type
-                case keyboard.KeyArrowRight:
+                switch key {
+                case rune(keyboard.KeyArrowRight):
                     fmt.Println("Adding a bot") // Debugging: print action
                     targetCount++
-                case keyboard.KeyArrowLeft:
+                case rune(keyboard.KeyArrowLeft):
                     fmt.Println("Removing a bot") // Debugging: print action
                     if targetCount > 0 {
                         targetCount--
